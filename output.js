@@ -1614,8 +1614,9 @@ function checkIncomingModuleAPI() {
 }
 
 // Imports from the Wasm binary.
-var _add = Module['_add'] = makeInvalidEarlyAccess('_add');
-var _multiply = Module['_multiply'] = makeInvalidEarlyAccess('_multiply');
+var _hitungStatus = Module['_hitungStatus'] = makeInvalidEarlyAccess('_hitungStatus');
+var _hitungTotal = Module['_hitungTotal'] = makeInvalidEarlyAccess('_hitungTotal');
+var _phKeScore = Module['_phKeScore'] = makeInvalidEarlyAccess('_phKeScore');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
@@ -1629,8 +1630,9 @@ var __indirect_function_table = makeInvalidEarlyAccess('__indirect_function_tabl
 var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 
 function assignWasmExports(wasmExports) {
-  assert(typeof wasmExports['add'] != 'undefined', 'missing Wasm export: add');
-  assert(typeof wasmExports['multiply'] != 'undefined', 'missing Wasm export: multiply');
+  assert(typeof wasmExports['hitungStatus'] != 'undefined', 'missing Wasm export: hitungStatus');
+  assert(typeof wasmExports['hitungTotal'] != 'undefined', 'missing Wasm export: hitungTotal');
+  assert(typeof wasmExports['phKeScore'] != 'undefined', 'missing Wasm export: phKeScore');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['emscripten_stack_init'] != 'undefined', 'missing Wasm export: emscripten_stack_init');
   assert(typeof wasmExports['emscripten_stack_get_free'] != 'undefined', 'missing Wasm export: emscripten_stack_get_free');
@@ -1641,8 +1643,9 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['emscripten_stack_get_current'] != 'undefined', 'missing Wasm export: emscripten_stack_get_current');
   assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
-  _add = Module['_add'] = createExportWrapper('add', 2);
-  _multiply = Module['_multiply'] = createExportWrapper('multiply', 2);
+  _hitungStatus = Module['_hitungStatus'] = createExportWrapper('hitungStatus', 3);
+  _hitungTotal = Module['_hitungTotal'] = createExportWrapper('hitungTotal', 3);
+  _phKeScore = Module['_phKeScore'] = createExportWrapper('phKeScore', 1);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];

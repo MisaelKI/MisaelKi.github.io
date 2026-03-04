@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status: WASPADA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --parchment: #f5ead6;
+      --parchment-deep: #d4b896;
+      --ink: #2c1810;
+      --ink-light: #4a2f1a;
+      --ink-faded: #7a5c3a;
+      --accent: #9a6e00;
+      --batik-gold: #c49a2a;
+      --batik-brown: #5c3317;
+      --batik-red: #8b2214;
+      --shadow: rgba(44,24,16,0.15);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background-color: var(--parchment);
+      color: var(--ink); font-family: 'Lora', serif;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    .batik-border { width:100%; height:14px; position:fixed; z-index:10; background: repeating-linear-gradient(90deg, #9a6e00 0px,#9a6e00 8px, var(--batik-gold) 8px,var(--batik-gold) 16px, var(--batik-brown) 16px,var(--batik-brown) 24px, var(--batik-gold) 24px,var(--batik-gold) 32px); }
+    .batik-border.top { top:0; } .batik-border.bottom { bottom:0; }
+    .batik-bg {
+      position: fixed; inset: 0; z-index: 0; opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='30' fill='none' stroke='%239a6e00' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='40' r='18' fill='none' stroke='%239a6e00' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='6' fill='none' stroke='%239a6e00' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='2' fill='%239a6e00'/%3E%3Cline x1='10' y1='40' x2='70' y2='40' stroke='%239a6e00' stroke-width='0.5'/%3E%3Cline x1='40' y1='10' x2='40' y2='70' stroke='%239a6e00' stroke-width='0.5'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .container { position:relative; z-index:1; max-width:580px; width:100%; padding:60px 24px; text-align:center; }
+    .result-stamp {
+      display: inline-block; border: 4px double var(--accent);
+      padding: 10px 36px 12px; margin-bottom: 32px; position: relative;
+      animation: stampIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .result-stamp::before {
+      content: ''; position: absolute;
+      top: 4px; bottom: 4px; left: 4px; right: 4px;
+      border: 1px solid var(--accent); opacity: 0.4;
+    }
+    /* Tilted stamp for waspada urgency */
+    .result-stamp { transform: rotate(-1.5deg); }
+    .stamp-label { font-family:'IM Fell English',serif; font-style:italic; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-faded); margin-bottom:2px; }
+    .stamp-status { font-family:'Playfair Display',serif; font-size:clamp(42px,10vw,72px); font-weight:900; color:var(--accent); line-height:1; text-shadow:2px 2px 0 rgba(154,110,0,0.15); }
+    @keyframes stampIn { from{opacity:0;transform:scale(0.6) rotate(-5deg)}to{opacity:1;transform:scale(1) rotate(-1.5deg)} }
+    .score-cert {
+      background: #fdf6e8; border: 1px solid var(--parchment-deep);
+      padding: 28px 36px; margin: 0 auto 32px; max-width: 420px;
+      box-shadow: 0 4px 20px var(--shadow), inset 0 0 40px rgba(212,184,150,0.15);
+      position: relative; animation: fadeUp 0.7s ease 0.3s both;
+    }
+    .score-cert::before { content:''; position:absolute; inset:6px; border:1px solid var(--parchment-deep); opacity:0.6; pointer-events:none; }
+    .cert-title { font-family:'Playfair Display',serif; font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-faded); margin-bottom:8px; }
+    .cert-score { font-family:'Playfair Display',serif; font-size:64px; font-weight:900; color:var(--accent); line-height:1; margin-bottom:4px; }
+    .cert-range { font-family:'IM Fell English',serif; font-style:italic; font-size:13px; color:var(--ink-faded); }
+    .ornament-row { display:flex; align-items:center; justify-content:center; gap:14px; margin:20px 0; }
+    .orn-line { flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--batik-gold), transparent); max-width:80px; }
+    .orn-star { color:var(--batik-gold); font-size:12px; }
+    /* Warning banner */
+    .warn-banner {
+      background: rgba(154,110,0,0.08); border: 1px solid rgba(154,110,0,0.3);
+      border-left: 3px solid var(--accent);
+      padding: 12px 18px; margin: 0 auto 20px; max-width:420px;
+      font-family:'Lora',serif; font-size:13px; color:var(--accent);
+      text-align:left; animation:fadeUp 0.7s ease 0.4s both;
+    }
+    .info-card {
+      background:#fdf6e8; border:1px solid var(--parchment-deep);
+      border-left:3px solid var(--accent);
+      padding:24px 28px; text-align:left;
+      margin-bottom:28px; max-width:420px; margin-left:auto; margin-right:auto;
+      box-shadow:0 2px 10px var(--shadow); animation:fadeUp 0.7s ease 0.5s both;
+    }
+    .info-card-title { font-family:'Playfair Display',serif; font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+    .info-list { list-style:none; }
+    .info-list li { display:flex; align-items:flex-start; gap:10px; padding:8px 0; font-size:13.5px; color:var(--ink-light); border-bottom:1px solid rgba(212,184,150,0.4); line-height:1.6; }
+    .info-list li:last-child { border-bottom:none; }
+    .info-list li::before { content:'⚠'; color:var(--accent); font-size:12px; margin-top:2px; flex-shrink:0; }
+    .btn-back {
+      display:inline-flex; align-items:center; gap:8px; padding:12px 28px;
+      background:transparent; border:2px solid var(--accent); color:var(--accent);
+      font-family:'Playfair Display',serif; font-size:13px; font-weight:700;
+      letter-spacing:0.08em; text-transform:uppercase; text-decoration:none;
+      transition:all 0.3s ease; animation:fadeUp 0.7s ease 0.6s both;
+    }
+    .btn-back:hover { background:var(--accent); color:#fdf6e8; transform:translateY(-1px); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+<div class="batik-border top"></div>
+<div class="batik-border bottom"></div>
+<div class="batik-bg"></div>
+<div class="container">
+  <p style="font-family:'IM Fell English',serif;font-style:italic;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faded);margin-bottom:24px;animation:fadeUp 0.5s ease both">Hasil Penilaian Status Lokasi</p>
+
+  <div class="result-stamp">
+    <div class="stamp-label">Status</div>
+    <div class="stamp-status">WASPADA</div>
+  </div>
+
+  <div class="score-cert">
+    <div class="cert-title">Total Skor</div>
+    <div class="cert-score" id="total-skor">–</div>
+    <div class="cert-range">dari rentang 5 – 7 (Status Waspada)</div>
+    <div class="ornament-row">
+      <div class="orn-line"></div>
+      <span class="orn-star">✦</span>
+      <div class="orn-line"></div>
+    </div>
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:13px;color:var(--ink-faded)">
+      Lingkungan memerlukan perhatian dan tindakan berkala.
+    </p>
+  </div>
+
+  <div class="warn-banner">
+    ⚠ Perlu pembersihan dan pemantauan dalam waktu dekat
+  </div>
+
+  <div class="info-card">
+    <div class="info-card-title">Rekomendasi Tindakan</div>
+    <ul class="info-list">
+      <li>Jadwalkan pembersihan dalam waktu dekat</li>
+      <li>Periksa sumber kelembapan dan perbaiki jika ada kebocoran</li>
+      <li>Monitor perubahan kondisi setiap minggu</li>
+      <li>Dokumentasikan kerusakan dengan foto sebagai bukti</li>
+      <li>Konsultasikan dengan teknisi bila kondisi memburuk</li>
+    </ul>
+  </div>
+
+  <a href="index.html" class="btn-back">← Periksa Lokasi Lain</a>
+
+  <p style="margin-top:32px;font-family:'IM Fell English',serif;font-style:italic;font-size:11px;color:var(--ink-faded);opacity:0.6;animation:fadeUp 0.7s ease 0.7s both">
+    Kelas XII-1 &nbsp;·&nbsp; Scoring System Lokasi &nbsp;·&nbsp; C++ WebAssembly
+  </p>
+</div>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const skor = params.get('skor');
+  if (skor) document.getElementById('total-skor').innerText = skor;
+</script>
+</body>
+</html>

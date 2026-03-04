@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Penilaian Status Lokasi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --parchment: #f5ead6;
+      --parchment-dark: #e8d5b0;
+      --parchment-deep: #d4b896;
+      --ink: #2c1810;
+      --ink-light: #4a2f1a;
+      --ink-faded: #7a5c3a;
+      --batik-red: #8b2214;
+      --batik-gold: #c49a2a;
+      --batik-brown: #5c3317;
+      --batik-green: #2d5016;
+      --shadow: rgba(44, 24, 16, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--parchment);
+      color: var(--ink);
+      font-family: 'Lora', serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+    .batik-border-top {
+      width: 100%;
+      height: 16px;
+      background: repeating-linear-gradient(90deg,
+        var(--batik-red) 0px, var(--batik-red) 8px,
+        var(--batik-gold) 8px, var(--batik-gold) 16px,
+        var(--batik-brown) 16px, var(--batik-brown) 24px,
+        var(--batik-gold) 24px, var(--batik-gold) 32px);
+      position: relative; z-index: 10;
+    }
+    .batik-bg {
+      position: fixed; inset: 0; z-index: 0; opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='30' fill='none' stroke='%238b2214' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='%238b2214' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='10' fill='none' stroke='%238b2214' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='3' fill='%238b2214'/%3E%3Cline x1='10' y1='40' x2='70' y2='40' stroke='%238b2214' stroke-width='0.5'/%3E%3Cline x1='40' y1='10' x2='40' y2='70' stroke='%238b2214' stroke-width='0.5'/%3E%3Cline x1='19' y1='19' x2='61' y2='61' stroke='%238b2214' stroke-width='0.5'/%3E%3Cline x1='61' y1='19' x2='19' y2='61' stroke='%238b2214' stroke-width='0.5'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .container {
+      position: relative; z-index: 1;
+      max-width: 720px; margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+    .header { text-align: center; margin-bottom: 40px; animation: fadeDown 0.9s ease both; }
+    .header-ornament {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; margin-bottom: 20px;
+    }
+    .ornament-line {
+      flex: 1; height: 1px; max-width: 120px;
+      background: linear-gradient(90deg, transparent, var(--batik-gold), transparent);
+    }
+    .ornament-diamond {
+      width: 10px; height: 10px;
+      background: var(--batik-red); transform: rotate(45deg);
+    }
+    .school-tag {
+      font-family: 'Lora', serif; font-style: italic;
+      font-size: 11px; color: var(--ink-faded);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 5vw, 40px); font-weight: 900;
+      color: var(--batik-red); line-height: 1.15; margin-bottom: 8px;
+    }
+    .subtitle {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 15px; color: var(--ink-faded); line-height: 1.7; margin-top: 10px;
+    }
+    .form-card {
+      background: #fdf6e8;
+      border: 1px solid var(--parchment-deep);
+      border-radius: 2px; padding: 40px 44px;
+      position: relative; animation: fadeUp 0.9s ease 0.2s both;
+      box-shadow: 0 2px 8px var(--shadow), 0 8px 32px rgba(44,24,16,0.08), inset 0 0 60px rgba(212,184,150,0.2);
+    }
+    .form-card::before {
+      content: ''; position: absolute;
+      top: 0; bottom: 0; left: 60px;
+      width: 1px; background: rgba(139,34,20,0.18);
+    }
+    .form-card::after {
+      content: ''; position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(180deg,
+        transparent 0px, transparent 31px,
+        rgba(180,150,110,0.12) 31px, rgba(180,150,110,0.12) 32px);
+      border-radius: 2px; pointer-events: none;
+    }
+    .form-inner { position: relative; z-index: 1; }
+    .section-title {
+      font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700;
+      color: var(--batik-red); letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--batik-gold), transparent); }
+    .roman { font-family: 'IM Fell English', serif; font-style: italic; color: var(--batik-brown); font-size: 16px; min-width: 24px; }
+    .input-group { margin-bottom: 28px; }
+    .label-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+    label {
+      display: block; font-family: 'Playfair Display', serif;
+      font-size: 13px; font-weight: 700; color: var(--ink-light);
+      letter-spacing: 0.04em;
+    }
+    input[type="number"], select {
+      width: 100%; background: transparent;
+      border: none; border-bottom: 2px solid var(--parchment-deep);
+      border-radius: 0; padding: 10px 4px;
+      color: var(--ink); font-family: 'Lora', serif;
+      font-size: 14px; transition: all 0.3s ease;
+      appearance: none; -webkit-appearance: none;
+    }
+    input[type="number"]:focus, select:focus {
+      outline: none; border-bottom-color: var(--batik-red);
+      background: rgba(139,34,20,0.03);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235c3317' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center; cursor: pointer;
+    }
+    select option { background: #fdf6e8; color: var(--ink); }
+    .hint { font-family: 'Lora', serif; font-style: italic; font-size: 11.5px; color: var(--ink-faded); margin-top: 6px; }
+    .divider { border: none; margin: 32px 0; display: flex; align-items: center; gap: 16px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--parchment-deep); }
+    .divider-diamond { width: 8px; height: 8px; background: var(--batik-gold); transform: rotate(45deg); flex-shrink: 0; }
+    .score-preview {
+      display: none; margin: 20px 0; padding: 16px 20px;
+      background: rgba(196,154,42,0.08); border: 1px solid rgba(196,154,42,0.3);
+      border-radius: 2px; text-align: center;
+    }
+    .score-preview.visible { display: block; animation: fadeUp 0.4s ease both; }
+    .score-label-text { font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--ink-faded); margin-bottom: 4px; }
+    .score-number { font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 900; color: var(--batik-brown); line-height: 1; }
+    .btn-submit {
+      width: 100%; padding: 16px;
+      background: var(--batik-red); border: none; border-radius: 2px;
+      color: #fdf6e8; font-family: 'Playfair Display', serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(139,34,20,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .btn-submit:hover { background: var(--batik-brown); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,34,20,0.3); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    #status-loading { text-align: center; font-family: 'IM Fell English', serif; font-style: italic; color: var(--ink-faded); font-size: 13px; margin-top: 12px; display: none; }
+    .reference-section { margin-top: 32px; animation: fadeUp 0.9s ease 0.4s both; }
+    .ref-title {
+      font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700;
+      color: var(--ink-light); letter-spacing: 0.1em; text-transform: uppercase;
+      text-align: center; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+    }
+    .ref-title::before, .ref-title::after { content: '✦'; color: var(--batik-gold); font-size: 10px; }
+    .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .ref-box {
+      background: #fdf6e8; border: 1px solid var(--parchment-deep);
+      border-top: 3px solid; padding: 18px 14px; text-align: center;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .ref-box.aman { border-top-color: var(--batik-green); }
+    .ref-box.waspada { border-top-color: var(--batik-gold); }
+    .ref-box.kritis { border-top-color: var(--batik-red); }
+    .ref-score { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+    .ref-box.aman .ref-score { color: var(--batik-green); }
+    .ref-box.waspada .ref-score { color: var(--batik-gold); }
+    .ref-box.kritis .ref-score { color: var(--batik-red); }
+    .ref-name { font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 4px; }
+    .ref-desc { font-family: 'Lora', serif; font-style: italic; font-size: 10.5px; color: var(--ink-faded); line-height: 1.5; }
+    .footer { text-align: center; margin-top: 40px; font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--ink-faded); animation: fadeUp 0.9s ease 0.6s both; }
+    #wasm-status {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #fdf6e8; border: 1px solid var(--parchment-deep); border-radius: 2px;
+      padding: 7px 14px; font-family: 'Lora', serif; font-style: italic; font-size: 11px;
+      color: var(--ink-faded); display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 2px 8px var(--shadow); z-index: 100;
+    }
+    #wasm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--parchment-deep); transition: background 0.3s; }
+    #wasm-status.ready #wasm-dot { background: var(--batik-green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+    @media(max-width:520px){ .form-card{padding:28px 20px} .form-card::before{left:40px} .ref-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<div class="batik-border-top"></div>
+<div class="batik-bg"></div>
+<div class="container">
+  <div class="header">
+    <p class="school-tag">Lembar Kerja Siswa — Kelas XII</p>
+    <div class="header-ornament">
+      <div class="ornament-line"></div>
+      <div class="ornament-diamond"></div>
+      <div class="ornament-line"></div>
+    </div>
+    <h1>Penentuan Status Lokasi</h1>
+    <p class="subtitle">Sistem Penilaian Kondisi Lingkungan<br>berdasarkan Parameter pH, Kelembapan, dan Kerusakan</p>
+    <div class="header-ornament" style="margin-top:20px;margin-bottom:0">
+      <div class="ornament-line"></div>
+      <div class="ornament-diamond"></div>
+      <div class="ornament-line"></div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="form-inner">
+      <div class="section-title"><span class="roman">I.</span> Isian Parameter Lokasi</div>
+      <div class="input-group">
+        <div class="label-row">
+          <span class="roman">1.</span>
+          <label for="input-ph">Nilai pH Tanah / Air</label>
+        </div>
+        <input type="number" id="input-ph" min="0" max="14" step="0.1" placeholder="Masukkan nilai pH (contoh: 6.5)" oninput="updatePreview()"/>
+
+      </div>
+      <div class="input-group">
+        <div class="label-row">
+          <span class="roman">2.</span>
+          <label for="input-kelembapan">Tingkat Kelembapan</label>
+        </div>
+        <select id="input-kelembapan" onchange="updatePreview()">
+          <option value="">— Pilih kondisi kelembapan —</option>
+          <option value="3">Basah / Tergenang</option>
+          <option value="2">Lembap</option>
+          <option value="1">Kering</option>
+        </select>
+        <p class="hint">Amati kondisi permukaan dan sekitar area yang diperiksa</p>
+      </div>
+      <div class="input-group">
+        <div class="label-row">
+          <span class="roman">3.</span>
+          <label for="input-kerusakan">Tingkat Kerusakan</label>
+        </div>
+        <select id="input-kerusakan" onchange="updatePreview()">
+          <option value="">— Pilih kondisi kerusakan —</option>
+          <option value="3">Pelapukan Berat / Lumut Tebal</option>
+          <option value="2">Berlumut Tipis</option>
+          <option value="1">Utuh &amp; Bersih</option>
+        </select>
+        <p class="hint">Perhatikan kondisi fisik struktur dan pertumbuhan organisme</p>
+      </div>
+      <div class="score-preview" id="score-preview">
+        <div class="score-label-text">Total Skor Sementara</div>
+        <div class="score-number" id="preview-number">—</div>
+      </div>
+      <div class="divider"><div class="divider-diamond"></div></div>
+      <div class="section-title"><span class="roman">II.</span> Proses Perhitungan</div>
+      <button class="btn-submit" id="btn-hitung" onclick="hitung()" disabled>✦ &nbsp; Tentukan Status Lokasi &nbsp; ✦</button>
+      <div id="status-loading">⟳ &nbsp; Sedang memproses dengan C++ engine...</div>
+    </div>
+  </div>
+  <div class="reference-section">
+    <div class="ref-title">Tabel Acuan Status</div>
+    <div class="ref-grid">
+      <div class="ref-box aman">
+        <div class="ref-score">3–4</div>
+        <div class="ref-name">Aman</div>
+        <div class="ref-desc">Lingkungan stabil, tidak ada tindakan mendesak</div>
+      </div>
+      <div class="ref-box waspada">
+        <div class="ref-score">5–7</div>
+        <div class="ref-name">Waspada</div>
+        <div class="ref-desc">Perlu pembersihan dan pemantauan berkala</div>
+      </div>
+      <div class="ref-box kritis">
+        <div class="ref-score">8–9</div>
+        <div class="ref-name">Kritis</div>
+        <div class="ref-desc">Risiko tinggi, tindakan segera diperlukan</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>NB: Kelas XII-1 — Penentuan status lokasi menggunakan scoring system</p>
+    <p style="margin-top:4px;opacity:0.6">Diproses oleh C++ WebAssembly Engine</p>
+  </div>
+</div>
+<div id="wasm-status">
+  <div id="wasm-dot"></div>
+  <span id="wasm-text">Memuat mesin C++...</span>
+</div>
+<script src="output.js"></script>
+<script>
+  let wasmReady = false;
+  let hitungStatus, hitungTotal, phKeScore;
+  Module.onRuntimeInitialized = function () {
+    wasmReady = true;
+    hitungStatus = Module.cwrap('hitungStatus', 'number', ['number','number','number']);
+    hitungTotal  = Module.cwrap('hitungTotal',  'number', ['number','number','number']);
+    phKeScore    = Module.cwrap('phKeScore',    'number', ['number']);
+    document.getElementById('wasm-status').classList.add('ready');
+    document.getElementById('wasm-text').innerText = 'Mesin C++ Siap';
+    updatePreview();
+  };
+  function getPhScore() {
+    if (!wasmReady) return null;
+    const ph = parseFloat(document.getElementById('input-ph').value);
+    if (isNaN(ph) || ph < 0 || ph > 14) return null;
+    return phKeScore(ph);
+  }
+  function updatePreview() {
+    const phScore  = getPhScore();
+    const kelScore = parseInt(document.getElementById('input-kelembapan').value);
+    const kerScore = parseInt(document.getElementById('input-kerusakan').value);
+    const allValid = phScore !== null && !isNaN(kelScore) && !isNaN(kerScore);
+    document.getElementById('btn-hitung').disabled = !allValid || !wasmReady;
+    if (allValid) {
+      const total = hitungTotal(phScore, kelScore, kerScore);
+      const preview = document.getElementById('score-preview');
+      const num = document.getElementById('preview-number');
+      preview.classList.add('visible');
+      num.innerText = total;
+      if (total <= 4) num.style.color = '#2d5016';
+      else if (total <= 7) num.style.color = '#c49a2a';
+      else num.style.color = '#8b2214';
+    } else {
+      document.getElementById('score-preview').classList.remove('visible');
+    }
+  }
+  function hitung() {
+    if (!wasmReady) return;
+    const phScore  = getPhScore();
+    const kelScore = parseInt(document.getElementById('input-kelembapan').value);
+    const kerScore = parseInt(document.getElementById('input-kerusakan').value);
+    if (phScore === null || isNaN(kelScore) || isNaN(kerScore)) { alert('Harap isi semua kolom!'); return; }
+    document.getElementById('status-loading').style.display = 'block';
+    document.getElementById('btn-hitung').disabled = true;
+    setTimeout(() => {
+      const status = hitungStatus(phScore, kelScore, kerScore);
+      const total  = hitungTotal(phScore, kelScore, kerScore);
+      if (status === 1) window.location.href = `aman.html?skor=${total}`;
+      else if (status === 2) window.location.href = `waspada.html?skor=${total}`;
+      else if (status === 3) window.location.href = `kritis.html?skor=${total}`;
+    }, 700);
+  }
+</script>
+</body>
+</html>
