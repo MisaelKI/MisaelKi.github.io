@@ -111,6 +111,8 @@
   </div>
 
   <div class="score-cert">
+    <div class="cert-title">Nama Lokasi</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ink-light);margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--parchment-deep);" id="nama-lokasi">–</div>
     <div class="cert-title">Total Skor</div>
     <div class="cert-score" id="total-skor">–</div>
     <div class="cert-range">dari rentang 5 – 7 (Status Waspada)</div>
@@ -148,7 +150,9 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const skor = params.get('skor');
+  const nama = params.get('nama');
   if (skor) document.getElementById('total-skor').innerText = skor;
+  if (nama) document.getElementById('nama-lokasi').innerText = decodeURIComponent(nama);
 </script>
 </body>
 </html>

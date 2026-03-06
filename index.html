@@ -222,6 +222,13 @@
       <div class="input-group">
         <div class="label-row">
           <span class="roman">1.</span>
+          <label for="input-nama">Nama Lokasi</label>
+        </div>
+        <input type="text" id="input-nama" placeholder="Masukkan nama lokasi (contoh: Gedung A)" oninput="updatePreview()" style="width:100%;background:transparent;border:none;border-bottom:2px solid var(--parchment-deep);padding:10px 4px;color:var(--ink);font-family:'Lora',serif;font-size:14px;outline:none;"/>
+      </div>
+      <div class="input-group">
+        <div class="label-row">
+          <span class="roman">2.</span>
           <label for="input-ph">Nilai pH Tanah / Air</label>
         </div>
         <input type="number" id="input-ph" min="0" max="14" step="0.1" placeholder="Masukkan nilai pH (contoh: 6.5)" oninput="updatePreview()"/>
@@ -229,7 +236,7 @@
       </div>
       <div class="input-group">
         <div class="label-row">
-          <span class="roman">2.</span>
+          <span class="roman">3.</span>
           <label for="input-kelembapan">Tingkat Kelembapan</label>
         </div>
         <select id="input-kelembapan" onchange="updatePreview()">
@@ -242,7 +249,7 @@
       </div>
       <div class="input-group">
         <div class="label-row">
-          <span class="roman">3.</span>
+          <span class="roman">4.</span>
           <label for="input-kerusakan">Tingkat Kerusakan</label>
         </div>
         <select id="input-kerusakan" onchange="updatePreview()">
@@ -312,10 +319,11 @@
     return phKeScore(ph);
   }
   function updatePreview() {
+    const nama    = document.getElementById('input-nama').value.trim();
     const phScore  = getPhScore();
     const kelScore = parseInt(document.getElementById('input-kelembapan').value);
     const kerScore = parseInt(document.getElementById('input-kerusakan').value);
-    const allValid = phScore !== null && !isNaN(kelScore) && !isNaN(kerScore);
+    const allValid = nama !== '' && phScore !== null && !isNaN(kelScore) && !isNaN(kerScore);
     document.getElementById('btn-hitung').disabled = !allValid || !wasmReady;
     if (allValid) {
       const total = hitungTotal(phScore, kelScore, kerScore);
@@ -332,18 +340,20 @@
   }
   function hitung() {
     if (!wasmReady) return;
+    const nama    = document.getElementById('input-nama').value.trim();
     const phScore  = getPhScore();
     const kelScore = parseInt(document.getElementById('input-kelembapan').value);
     const kerScore = parseInt(document.getElementById('input-kerusakan').value);
-    if (phScore === null || isNaN(kelScore) || isNaN(kerScore)) { alert('Harap isi semua kolom!'); return; }
+    if (!nama || phScore === null || isNaN(kelScore) || isNaN(kerScore)) { alert('Harap isi semua kolom!'); return; }
     document.getElementById('status-loading').style.display = 'block';
     document.getElementById('btn-hitung').disabled = true;
     setTimeout(() => {
       const status = hitungStatus(phScore, kelScore, kerScore);
       const total  = hitungTotal(phScore, kelScore, kerScore);
-      if (status === 1) window.location.href = `aman.html?skor=${total}`;
-      else if (status === 2) window.location.href = `waspada.html?skor=${total}`;
-      else if (status === 3) window.location.href = `kritis.html?skor=${total}`;
+      const namaEncoded = encodeURIComponent(nama);
+      if (status === 1) window.location.href = `aman.html?skor=${total}&nama=${namaEncoded}`;
+      else if (status === 2) window.location.href = `waspada.html?skor=${total}&nama=${namaEncoded}`;
+      else if (status === 3) window.location.href = `kritis.html?skor=${total}&nama=${namaEncoded}`;
     }, 700);
   }
 </script>
